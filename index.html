@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>canvas</title>
+</head>
+<style>
+	html,
+	body{
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+	}
+</style>
+<body>
+	<canvas id="myCanvas"></canvas>
+</body>
+<script src="jquery-3.0.0.min.js"></script>
+<script>
+	var module = {
+
+		/**
+		 * @name canvas
+		 * @param 画布盒子
+		 */
+		canvas: document.getElementById('myCanvas'),
+
+		/**
+		 * @name init
+		 * @param 初始化方法
+		 */
+		init: function(){
+			this.canvasCircleArr = [];
+			if (this.canvas.getContext) {
+				//获取对应的CanvasRenderingContext2D对象(画笔)
+				this.ctx = this.canvas.getContext("2d");
+				this.message();
+				this.pushCircle(); //获取数据
+			} else {
+				return false;
+			}
+		},
+		/**
+		 * @name message
+		 * @param 读取浏览器窗口信息赋值
+		 */
+		message: function(){
+			this.width = $(window).width();
+			this.height = $(window).height();
+			this.canvas.width = this.width;
+			this.canvas.height = this.height;
+
+			this.setCircle();
+		},
+		/**
+		 * @name setCircle
+		 * @param 初始化界面，生产数据
+		 */
+		setCircle: function(){
+			var that = this;
+			for (var i = 0; i < 21; i++) {
+				that.pushCircleArr(i);
+			}
+		},
+		/**
+		 * @name pushCircleArr
+		 * @param 生产数据模块
+		 */
+		pushCircleArr: function(i){
+			var 
+				widthRandom = this.getRandom('',this.width-50,20),
+				heightRandom = this.getRandom('',this.height-50,20),
+				circleRudioRandom = this.getRandom('',15),
+				circleVx = this.getRandom('',1, -0.5),
+				circleVy = this.getRandom('',1, -0.5);
+
+			this.canvasCircleArr[i] = {
+				x: widthRandom,
+				y: heightRandom,
+				r: circleRudioRandom,
+				vX: circleVx,
+				vY: circleVy
+			};
+		},
+		/**
+		 * @name pushCircleArr2
+		 * @param 动态生产的数据模块
+		 */
+		pushCircleArr2: function(i){
+			var attrX = [0,this.width];
+			var attrY = [0,this.height];
+			var widthRandom,heightRandom,circleRudioRandom = this.getRandom('',15),circleVx,circleVy;
+
+			if (this.getRandom('round')) {
+				widthRandom = this.getRandom('',this.width);
+				if (this.getRandom('round')) {
+					heightRandom = attrY[1];
+					circleVx = this.getRandom('',1, -0.5);
+					circleVy = this.getRandom('',-1);
+				}else{
+					heightRandom = attrY[0];
+					circleVx = this.getRandom('',-1);
+					circleVy = this.getRandom('',1,-0.5);
+				}
+				
+			}else{
+				heightRandom = this.getRandom('',this.height);
+				if (this.getRandom('round')) {
+					widthRandom = attrX[1];
+					circleVx = this.getRandom('',1, -0.5);
+					circleVy = this.getRandom('',-1);
+				}else{
+					widthRandom = attrX[0];
+					circleVx = this.getRandom('',-1);
+					circleVy = this.getRandom('',1,-0.5);
+				}
+			}
+
+			this.canvasCircleArr[i] = {
+				x: widthRandom,
+				y: heightRandom,
+				r: circleRudioRandom,
+				vX: circleVx,
+				vY: circleVy
+			};
+		},
+		/**
+		 * @name pushCircle
+		 * @param 初始化界面，并开启动画
+		 */
+		pushCircle: function(){
+			var that = this;
+			var array = this.canvasCircleArr;
+			var length = array.length;
+			var CENTERLENGTH = parseInt(length/2);
+			for ( var i in array ) {
+				that.setCircleModule(array[i].x,array[i].y,array[i].r);
+				// if ( i <= CENTERLENGTH ) {
+				// 	for (var k = 0; k < CENTERLENGTH; k++) {
+				// 		if (k!=i) {
+				// 			that.setLineModule(array[i].x, array[i].y, array[k].x, array[k].y, 1);
+				// 		}
+				// 	}
+				// }else{
+				// 	for (var k = CENTERLENGTH - 1; k < length; k++) {
+				// 		if (k!=i) {
+				// 			that.setLineModule(array[i].x, array[i].y, array[k].x, array[k].y, 1);
+				// 		}
+				// 	}
+				// }
+			}
+			this.start(array);
+		},
+		/**
+		 * @name setCircleModule
+		 * @param 生成圆球模块
+		 */
+		setCircleModule: function(x, y, r, color) {
+			color = color ? color : '#ccc';
+			this.ctx.beginPath();
+			this.ctx.fillStyle = color; //填充当前绘制区域颜色
+			this.ctx.arc(x, y, r, 0, Math.PI*2, true);
+			this.ctx.globalAlpha = 0.5;
+			this.ctx.fill();
+			this.ctx.closePath();
+		},
+		/**
+		 * @name setLineModule
+		 * @param 生成连线模块
+		 */
+		setLineModule: function(fromX, fromY, toX, toY, pattern, color) {
+
+		    if (typeof pattern === "undefined") {
+		        pattern = 5;
+		    }
+		    color = color ? color : '#eee';
+		    var dx = (toX - fromX);
+		    var dy = (toY - fromY);
+		    var distance = Math.floor(Math.sqrt(dx * dx + dy * dy));
+		    var dashlineInteveral = (pattern <= 0) ? distance : (distance / pattern);
+		    var deltay = (dy / distance) * pattern;
+		    var deltax = (dx / distance) * pattern;
+
+		    this.ctx.beginPath();
+		    for (var dl = 0; dl < dashlineInteveral; dl++) {
+		        if (dl % 2) {
+		            this.ctx.lineTo(fromX + dl * deltax, fromY + dl * deltay);
+		        } else {
+		            this.ctx.moveTo(fromX + dl * deltax, fromY + dl * deltay);
+		        }
+		    }
+		    this.ctx.strokeStyle = color;
+		    this.ctx.stroke();
+		},
+		/**
+		 * @name start
+		 * @param 开始运动
+		 */
+		start: function(array){
+			var that = this;
+			var maxX = this.canvas.width;
+			var maxY = this.canvas.height;
+			var length = array.length;
+			var CENTERLENGTH = parseInt(length/2);
+			var feed = 1;
+			that.clear();
+			for ( var i in array ) {
+
+				array[i].x+=array[i].vX;
+				array[i].y+=array[i].vY;
+
+	            if(array[i].x>=maxX){
+	                that.pushCircleArr2(i);
+	            }
+	            if(array[i].x<=0){
+	                that.pushCircleArr2(i);
+	            }           
+	            if(array[i].y>=maxY){
+	                that.pushCircleArr2(i);
+	            }
+	            if(array[i].y<=0){
+	                that.pushCircleArr2(i);
+	            }
+	            that.setCircleModule(array[i].x,array[i].y,array[i].r);
+	            if ( i <= CENTERLENGTH ) {
+					for (var k = 0; k < CENTERLENGTH; k++) {
+						if (k!=i) {
+							that.setLineModule(array[i].x, array[i].y, array[k].x, array[k].y, 1);
+						}
+					}
+				}else{
+					for (var k = CENTERLENGTH; k < length; k++) {
+						if (k!=i) {
+							that.setLineModule(array[i].x, array[i].y, array[k].x, array[k].y, 1);
+						}
+					}
+				}
+			}
+			this.setTime = setTimeout(function(){
+				that.start(that.canvasCircleArr);
+			},feed);
+		},
+		/**
+		 * @name getRandom
+		 * @param 生成随机数
+		 */
+		getRandom: function(type,num,add){
+			add = add ? add : 0;
+			num = num ? num : 1;
+			if (type === "round") {
+				return Math.round(Math.random()*num+add);
+			}else{
+				return Math.random()*num+add;
+			}
+		},
+		/**
+		 * @name clear
+		 * @param 清除画布
+		 */
+		clear: function() {
+			this.ctx.clearRect(0, 0, this.width, this.height);
+		}
+
+	}
+	module.init();
+</script>
+</html>
